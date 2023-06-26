@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+
+##################################################
+## ximg: Fetch image's metadata within terminal.
+
+## Author: Shiyan Shirani
+## Copyright: Copyright 2023, ximg
+## License: MIT 2023
+## Version: v.0.1
+## Mmaintainer: Shiyan Shirani
+## Email: shiyan99s@gmail.com
+##################################################
+
+import argparse
+from datetime import datetime
+
+from exif import Image
+
+
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+
+def start(args: argparse.Namespace) -> dict:
+    """Fetch image's metadata and return dictionary of it."""
+    with open(args.image, "r") as image:
+        image = Image(args.image)
+        data_dict = {}
+        for item in image.list_all():
+            if not image.get(item):
+                data_dict["none_item"] = data_dict.get("none_item", 0) + 1
+            data_dict[str(item)] = image.get(item)
+
+        return data_dict
+
+
+def argparse_helper() -> argparse.Namespace:
+    """Grab user provided arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("image", help="Add image file path")
+    args = parser.parse_args()
+    return args
+
+
+def _print(metadata: dict) -> None:
+    """Pretty print metadata"""
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{bcolors.OKCYAN}ximg: {time} {bcolors.ENDC}")
+    print(
+        f"{bcolors.WARNING}{metadata['none_item']} attributes not present in image. {bcolors.ENDC}"
+    )
+    for index, data in enumerate(metadata, 1):
+        if data == "none_item":
+            continue
+        print(f'-→ {data.replace("_", " ").title().strip(" ")}: {str(metadata[data])}')
+
+
+if __name__ == "__main__":
+    args = argparse_helper()
+    data = start(args)
+    _print(data)
