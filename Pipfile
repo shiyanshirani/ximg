@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pillow = "*"
 exif = "*"
+homebrew-pypi-poet = "*"
 
 [dev-packages]
 
